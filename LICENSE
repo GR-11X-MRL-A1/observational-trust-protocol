@@ -1,4 +1,18 @@
-                    GNU AFFERO GENERAL PUBLIC LICENSE
+Multi-License Notice
+
+This repository is multi-licensed. By using or copying this repository, you agree to the terms of the applicable license(s).
+
+- The software source code contained in this repository is licensed under the GNU Affero General Public License version 3 (AGPL-3.0). The full text of the AGPL license is included below.
+
+- The specification documents and figures (including Markdown and PDF files under `spec/` and `docs/`) are licensed under the Creative Commons Attribution 4.0 International (CC BY 4.0) license.
+
+- The logos and seal artwork (under `assets/seals/` and elsewhere) are licensed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0) license.
+
+For questions regarding alternative licensing, please contact emailme@matthewlabarre.com.
+
+----
+
+                      GNU AFFERO GENERAL PUBLIC LICENSE
                        Version 3, 19 November 2007
 
  Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
