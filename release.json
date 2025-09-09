@@ -1,0 +1,24 @@
+{
+  "name": "CSP v1.1 (arXiv v1)",
+  "released": "2025-09-08T00:00:00Z",
+  "steward": "MATTHEW RUSSELL LABARRE",
+  "contact": "emailme@matthewlabarre.com",
+  "canonical": "https://matthewlabarre.com",
+  "artifacts": [
+    {
+      "name": "csp_arxiv_v1.1.tex",
+      "sha256": "0395d34c055d8612b0e7847f58745cc662d267f97b79d3ba7a3c71daeb463dcd",
+      "sha384": "5b8dda67f2258b0e435d674138488d4c22cf2270818c2b54ebbc140c18860c99d424f93a20d2d3ae602804f7ccee3e1b",
+      "sha512": "a2e7cb4728bd941dc92484d1c66fce63fac3d7a963f817ec885777180a9f4db6a9e7698bb0676af9c724300faeea496b73af974e1b100141efc7ec16ff948f16",
+      "url": ""
+    },
+    {
+      "name": "CSP_arXiv_v1.1_source.zip",
+      "sha256": "f61f6836eb7f353ee3cd6451eb100e3c984617041dc195f8e19faba36259e28e",
+      "sha384": "94072c13434f4abf23b080c40ab8039cb7ed20cc1fd4ac5497a44a9ae8d960cd92ce276065039ced99eaa0ce77a5e8ca",
+      "sha512": "a75230a040baa0d5e4ec6282a17c474c7cb500fc3bb4b9a628abbed65d03b5e07e82ae2fa0869319f7ba8d9ad8753b32f9567786af5e7084a92a331988bcd5a6",
+      "url": ""
+    }
+  ],
+  "notes": "BangCheck blocks are protocol-only; courtesy digests are provided in a separate manifest."
+}

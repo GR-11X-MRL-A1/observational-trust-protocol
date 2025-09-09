@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cosmic Sealer 2.2 — Text/File + Cover/Zip</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/1.3.1/forge.min.js"></script>
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { color-scheme: dark; }
+    body { font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', sans-serif; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; }
+    pre { white-space: pre-wrap; }
+  </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex items-center justify-center p-4">
+  <div class="bg-gray-800 p-6 md:p-8 rounded-xl shadow-2xl max-w-5xl w-full">
+    <h1 class="text-3xl font-bold text-center mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">
+      Cosmic Sealer 2.2
+    </h1>
+    <p class="text-sm text-gray-400 text-center mb-6">Seal text or files; prepend a cover page to PDFs or bundle everything into a ZIP.</p>
+
+    <!-- Mode Tabs -->
+    <div class="flex gap-2 mb-4">
+      <button id="tabText" class="px-3 py-1 rounded bg-purple-700">Text</button>
+      <button id="tabFile" class="px-3 py-1 rounded bg-gray-700 hover:bg-gray-600">File</button>
+    </div>
+
+    <!-- TEXT MODE -->
+    <form id="textForm" class="space-y-4" onsubmit="event.preventDefault(); sealText();">
+      <label class="block">
+        <span class="sr-only">Text to seal</span>
+        <textarea id="inputText" placeholder="Type your truth here…" class="w-full h-32 p-4 text-sm bg-gray-700 text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition duration-300" aria-label="Text to seal"></textarea>
+      </label>
+      <div class="flex items-center justify-between text-xs text-gray-400">
+        <span id="charCount">0 chars</span>
+        <button type="button" id="resetBtn" class="px-3 py-1 rounded bg-gray-700 hover:bg-gray-600">Reset</button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <label class="flex items-center gap-2 bg-gray-700 rounded-lg px-3 py-2">
+          <input id="geoToggle" type="checkbox" class="h-4 w-4 rounded border-gray-500 text-purple-600 focus:ring-purple-500" />
+          <span class="text-sm">Include geolocation</span>
+        </label>
+        <label class="flex items-center gap-2 bg-gray-700 rounded-lg px-3 py-2">
+          <input id="fpToggle" type="checkbox" class="h-4 w-4 rounded border-gray-500 text-purple-600 focus:ring-purple-500" />
+          <span class="text-sm">Browser fingerprint</span>
+        </label>
+        <label class="flex items-center gap-2 bg-gray-700 rounded-lg px-3 py-2">
+          <span class="text-sm">Variant</span>
+          <select id="variant" class="ml-auto bg-gray-800 border border-gray-600 rounded-md px-2 py-1 text-sm">
+            <option value="CSL-Min" selected>CSL-Min</option>
+            <option value="CSL-Plus">CSL-Plus (adds COSMIC_BASE)</option>
+          </select>
+        </label>
+      </div>
+
+      <details class="bg-gray-700 rounded-lg">
+        <summary class="cursor-pointer select-none px-4 py-2 font-semibold">FLOATCODE (tactical signature)</summary>
+        <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+          <label class="block">
+            <div class="text-xs text-gray-300 mb-1">UN</div>
+            <input id="fc_un" class="w-full bg-gray-800 border border-gray-600 rounded px-2 py-1" value="OSCAR" />
+          </label>
+          <label class="block">
+            <div class="text-xs text-gray-300 mb-1">Latin</div>
+            <input id="fc_latin" class="w-full bg-gray-800 border border-gray-600 rounded px-2 py-1" value="Sigillum Temporis" />
+          </label>
+          <label class="block">
+            <div class="text-xs text-gray-300 mb-1">Sanskrit</div>
+            <input id="fc_sanskrit" class="w-full bg-gray-800 border border-gray-600 rounded px-2 py-1" value="Kāla-mudrā" />
+          </label>
+          <label class="block">
+            <div class="text-xs text-gray-300 mb-1">KB</div>
+            <input id="fc_kb" class="w-full bg-gray-800 border border-gray-600 rounded px-2 py-1" value="The Information (2011)" />
+          </label>
+          <label class="block md:col-span-2">
+            <div class="text-xs text-gray-300 mb-1">FLOATSIGN</div>
+            <input id="fc_sign" class="w-full bg-gray-800 border border-gray-600 rounded px-2 py-1" value="CROWNED CAT 🕶️👑🐈‍⬛" />
+          </label>
+          <label class="flex items-center gap-2 md:col-span-2">
+            <input id="fc_include" type="checkbox" class="h-4 w-4 rounded border-gray-500 text-purple-600 focus:ring-purple-500" checked />
+            <span class="text-sm">Include FLOATCODE in outputs</span>
+          </label>
+        </div>
+      </details>
+
+      <div class="flex items-center justify-between gap-3">
+        <div id="messageBoxText" class="text-sm text-red-300" role="alert" aria-live="polite"></div>
+        <button type="submit" class="px-6 py-3 font-semibold rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg transform transition-transform duration-300 hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+          Seal Text
+        </button>
+      </div>
+    </form>
+
+    <!-- FILE MODE -->
+    <form id="fileForm" class="space-y-4 hidden" onsubmit="event.preventDefault(); sealFile();">
+      <div class="grid md:grid-cols-2 gap-3">
+        <label class="block">
+          <div class="text-xs text-gray-300 mb-1">Choose file</div>
+          <input id="fileInput" type="file" class="w-full text-sm bg-gray-700 rounded px-2 py-2" />
+        </label>
+        <label class="block">
+          <div class="text-xs text-gray-300 mb-1">Optional logo image (PNG/JPEG)</div>
+          <input id="logoInput" type="file" accept="image/png,image/jpeg" class="w-full text-sm bg-gray-700 rounded px-2 py-2" />
+        </label>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-3">
+        <label class="flex items-center gap-2 bg-gray-700 rounded-lg px-3 py-2">
+          <input id="geoToggleF" type="checkbox" class="h-4 w-4 rounded border-gray-500 text-purple-600 focus:ring-purple-500" />
+          <span class="text-sm">Include geolocation</span>
+        </label>
+        <label class="flex items-center gap-2 bg-gray-700 rounded-lg px-3 py-2">
+          <input id="fpToggleF" type="checkbox" class="h-4 w-4 rounded border-gray-500 text-purple-600 focus:ring-purple-500" />
+          <span class="text-sm">Browser fingerprint</span>
+        </label>
+        <label class="flex items-center gap-2 bg-gray-700 rounded-lg px-3 py-2">
+          <span class="text-sm">Variant</span>
+          <select id="variantF" class="ml-auto bg-gray-800 border border-gray-600 rounded-md px-2 py-1 text-sm">
+            <option value="CSL-Min" selected>CSL-Min</option>
+            <option value="CSL-Plus">CSL-Plus</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-3">
+        <label class="flex items-center gap-2 bg-gray-700 rounded-lg px-3 py-2">
+          <input id="addCover" type="checkbox" class="h-4 w-4 rounded border-gray-500 text-purple-600 focus:ring-purple-500" />
+          <span class="text-sm">Prepend Cover to PDF</span>
+        </label>
+        <label class="flex items-center gap-2 bg-gray-700 rounded-lg px-3 py-2">
+          <input id="zipBundle" type="checkbox" class="h-4 w-4 rounded border-gray-500 text-purple-600 focus:ring-purple-500" checked />
+          <span class="text-sm">Create ZIP bundle</span>
+        </label>
+        <div class="text-xs text-gray-400 flex items-center">If file is not PDF, cover will be skipped (ZIP still built).</div>
+      </div>
+
+      <div class="flex items-center justify-between gap-3">
+        <div id="messageBoxFile" class="text-sm text-red-300" role="alert" aria-live="polite"></div>
+        <button type="submit" class="px-6 py-3 font-semibold rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg transform transition-transform duration-300 hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+          Seal File
+        </button>
+      </div>
+    </form>
+
+    <!-- Output -->
+    <section id="output" class="mt-8 p-6 bg-gray-700 rounded-xl transition-opacity duration-500 opacity-0 hidden">
+      <h2 class="text-xl font-bold mb-4 border-b border-gray-600 pb-2">Seal Record</h2>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="bg-gray-800 p-4 rounded-lg">
+          <div class="text-xs text-gray-400">Artifact Fingerprint (S1)</div>
+          <div id="s1Short" class="mono text-sm text-purple-300 break-words"></div>
+          <div id="s1Full" class="mono text-[0.7rem] text-gray-400 break-words mt-1"></div>
+        </div>
+        <div class="bg-gray-800 p-4 rounded-lg">
+          <div class="text-xs text-gray-400">Spacetime Fingerprint (S2_LITE)</div>
+          <div id="s2Short" class="mono text-sm text-pink-300 break-words"></div>
+          <div id="s2Full" class="mono text-[0.7rem] text-gray-400 break-words mt-1"></div>
+        </div>
+      </div>
+
+      <div class="mt-4 grid md:grid-cols-2 gap-4">
+        <details class="bg-gray-800 rounded-lg">
+          <summary class="cursor-pointer select-none px-4 py-2 font-semibold">Context JSON</summary>
+          <pre id="sealJson" class="px-4 py-3 text-xs mono text-gray-300 overflow-x-auto"></pre>
+        </details>
+        <details class="bg-gray-800 rounded-lg">
+          <summary class="cursor-pointer select-none px-4 py-2 font-semibold">BangCheck Block</summary>
+          <pre id="bangBlock" class="px-4 py-3 text-xs mono text-gray-300 overflow-x-auto"></pre>
+        </details>
+      </div>
+
+      <div id="labOutput" class="mt-6 p-4 rounded-lg bg-gray-800 text-sm text-gray-300"></div>
+    </section>
+  </div>
+
+<script>
+// ---------- Utilities ----------
+const toHex = buf => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+
+async function sha384Hex(input) {
+  try {
+    if (typeof input === 'string') {
+      const enc = new TextEncoder();
+      const data = enc.encode(input);
+      const digest = await crypto.subtle.digest('SHA-384', data);
+      return toHex(digest);
+    } else if (input instanceof ArrayBuffer) {
+      const digest = await crypto.subtle.digest('SHA-384', input);
+      return toHex(digest);
+    }
+  } catch (e) {
+    if (typeof forge !== 'undefined' && forge.md && forge.md.sha384) {
+      const md = forge.md.sha384.create();
+      if (typeof input === 'string') {
+        md.update(input);
+      } else {
+        // Convert bytes to string (lossless) via binary encoding
+        const view = new Uint8Array(input);
+        let bin = '';
+        for (let i=0;i<view.length;i++) bin += String.fromCharCode(view[i]);
+        md.update(bin);
+      }
+      return md.digest().toHex();
+    }
+    throw e;
+  }
+}
+
+function shortHash(hex) { return hex.slice(0, 20) + '…' + hex.slice(-8); }
+function nowISO() { return new Date().toISOString(); }
+
+function saveFile(filename, blobOrText, mime='text/plain;charset=utf-8') {
+  const blob = blobOrText instanceof Blob ? blobOrText : new Blob([blobOrText], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  URL.revokeObjectURL(url);
+  a.remove();
+}
+
+function collectFingerprint() {
+  return {
+    ua: navigator.userAgent,
+    lang: navigator.language,
+    tz: Intl.DateTimeFormat().resolvedOptions().timeZone || null,
+    tzOffsetMin: new Date().getTimezoneOffset(),
+    platform: navigator.platform,
+    vendor: navigator.vendor,
+    screen: { w: screen.width, h: screen.height, aw: screen.availWidth, ah: screen.availHeight, dpr: window.devicePixelRatio || 1, colorDepth: screen.colorDepth },
+    memoryGB: navigator.deviceMemory || null,
+    cores: navigator.hardwareConcurrency || null
+  };
+}
+
+function getGeolocation(enabled) {
+  return new Promise(resolve => {
+    if (!enabled || !('geolocation' in navigator)) {
+      return resolve({ type: 'logical', label: 'Web Browser' });
+    }
+    navigator.geolocation.getCurrentPosition(
+      pos => resolve({
+        type: 'physical',
+        lat: Number(pos.coords.latitude.toFixed(6)),
+        lon: Number(pos.coords.longitude.toFixed(6)),
+        accuracy_m: Math.round(pos.coords.accuracy),
+        source: 'navigator.geolocation'
+      }),
+      _err => resolve({ type: 'logical', label: 'Web Browser' }),
+      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+    );
+  });
+}
+
+function getFloatcodeFromUI() {
+  const include = document.getElementById('fc_include')?.checked;
+  if (!include) return undefined;
+  return {
+    UN: document.getElementById('fc_un').value || null,
+    Latin: document.getElementById('fc_latin').value || null,
+    Sanskrit: document.getElementById('fc_sanskrit').value || null,
+    KB: document.getElementById('fc_kb').value || null,
+    FLOATSIGN: document.getElementById('fc_sign').value || null
+  };
+}
+
+// ---------- Core Seal ----------
+async function buildSeal({ payloadText, payloadBytes, includeGeo=false, includeFingerprint=false, variant='CSL-Min', floatcode }) {
+  const t_in = nowISO();
+  const startPerf = performance.now();
+
+  const s1 = await sha384Hex(payloadBytes ?? payloadText);
+
+  const [location, fingerprint] = await Promise.all([
+    getGeolocation(includeGeo),
+    Promise.resolve(includeFingerprint ? collectFingerprint() : undefined)
+  ]);
+
+  const t_out = nowISO();
+  const endPerf = performance.now();
+  const duration_ms = Number((endPerf - startPerf).toFixed(2));
+
+  const context = {
+    variant, t_in, t_out, duration_ms,
+    monotonic: {
+      timeOrigin_ms: Math.round(performance.timeOrigin),
+      t_in_perf_ms: Math.round(startPerf),
+      t_out_perf_ms: Math.round(endPerf)
+    },
+    location, fingerprint,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || null
+  };
+
+  const cslBasis = JSON.stringify({
+    t_in: context.t_in, t_out: context.t_out, duration_ms: context.duration_ms, location: context.location
+  });
+  const s2_lite = await sha384Hex(cslBasis + s1);
+
+  let cosmic_base = undefined;
+  if (variant === 'CSL-Plus') {
+    cosmic_base = {
+      tz: context.timezone,
+      unix: Math.floor(Date.now() / 1000),
+      dayOfYear: Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000),
+      location: context.location
+    };
+  }
+
+  const sealRecord = { s1, s2_lite, context, cosmic_base, floatcode };
+
+  // BangCheck
+  const lines = [];
+  lines.push('!BEGIN COSMIC-SEAL');
+  lines.push('!RPP: ' + cslBasis);
+  lines.push('!CSL: ' + JSON.stringify(context));
+  lines.push('!S1_CONTENT: ' + s1);
+  lines.push('!S2_LITE: ' + s2_lite);
+  if (floatcode) lines.push('!FLOATCODE: ' + JSON.stringify(floatcode));
+  lines.push('!ANCHORS: ANNEX_LEDGER_2025-08-27.md');
+  lines.push('!NOTES: CSL-Min; [WORKING THEORY] ephemerides pending');
+  lines.push('!END COSMIC-SEAL');
+  const blockWithoutHash = lines.join('\n');
+  const blockHash = await sha384Hex(blockWithoutHash);
+  const bangBlock = blockWithoutHash + '\n!SHA384-BLOCK: ' + blockHash;
+
+  return { s1, s2_lite, context, sealRecord, bangBlock, duration_ms };
+}
+
+// ---------- TEXT MODE ----------
+let lastSeal = null;
+
+async function sealText() {
+  const input = document.getElementById('inputText').value;
+  const message = document.getElementById('messageBoxText');
+  message.textContent = '';
+  if (!input.trim()) { message.textContent = 'Please enter some text.'; return; }
+
+  const includeGeo = document.getElementById('geoToggle').checked;
+  const includeFingerprint = document.getElementById('fpToggle').checked;
+  const variant = document.getElementById('variant').value;
+  const floatcode = getFloatcodeFromUI();
+
+  lastSeal = await buildSeal({ payloadText: input, includeGeo, includeFingerprint, variant, floatcode });
+  showSeal(lastSeal);
+}
+
+// ---------- FILE MODE ----------
+async function sealFile() {
+  const fileEl = document.getElementById('fileInput');
+  const message = document.getElementById('messageBoxFile');
+  message.textContent = '';
+  const file = fileEl.files && fileEl.files[0];
+  if (!file) { message.textContent = 'Choose a file first.'; return; }
+
+  const arrayBuffer = await file.arrayBuffer();
+
+  const includeGeo = document.getElementById('geoToggleF').checked;
+  const includeFingerprint = document.getElementById('fpToggleF').checked;
+  const variant = document.getElementById('variantF').value;
+  const floatcode = getFloatcodeFromUI();
+
+  const seal = await buildSeal({ payloadBytes: arrayBuffer, includeGeo, includeFingerprint, variant, floatcode });
+  showSeal(seal);
+
+  const addCover = document.getElementById('addCover').checked;
+  const zipBundle = document.getElementById('zipBundle').checked;
+  const name = file.name;
+  const base = name.replace(/\.[^.]+$/, '');
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+
+  // If PDF and addCover, build a covered PDF
+  let coveredPdfBytes = null;
+  if (addCover && file.type === 'application/pdf') {
+    coveredPdfBytes = await buildCoveredPdf(arrayBuffer, seal, document.getElementById('logoInput').files[0]);
+    saveFile(`${base}_sealed.pdf`, new Blob([coveredPdfBytes], {type:'application/pdf'}), 'application/pdf');
+  }
+
+  if (zipBundle) {
+    const zip = new JSZip();
+    zip.file(name, arrayBuffer);
+    zip.file(`seal_${stamp}.json`, JSON.stringify(seal.sealRecord, null, 2));
+    zip.file(`bangcheck_${stamp}.txt`, seal.bangBlock);
+    if (coveredPdfBytes) {
+      zip.file(`${base}_sealed.pdf`, coveredPdfBytes);
+    }
+    const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+    saveFile(`${base}_sealed_${stamp}.zip`, blob, 'application/zip');
+  }
+}
+
+// Build a cover page and prepend to an existing PDF
+async function buildCoveredPdf(originalBytes, seal, logoFile) {
+  const PDFLib = window['PDFLib'];
+  const srcDoc = await PDFLib.PDFDocument.load(originalBytes);
+  const first = srcDoc.getPage(0);
+  const { width, height } = first.getSize();
+
+  const outDoc = await PDFLib.PDFDocument.create();
+  const font = await outDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+  const cover = outDoc.addPage([width, height]);
+
+  // Background stripe
+  cover.drawRectangle({ x:0, y:height-72, width, height:72, color: PDFLib.rgb(0.2,0.1,0.3)});
+
+  // Title
+  cover.drawText('COSMIC SEAL COVER', { x: 36, y: height-50, size: 18, font, color: PDFLib.rgb(1,1,1) });
+
+  // Logo: if provided, embed; else draw an octagram (lines)
+  if (logoFile) {
+    const bytes = await logoFile.arrayBuffer();
+    let img;
+    const type = logoFile.type;
+    if (type === 'image/png') img = await outDoc.embedPng(bytes);
+    else img = await outDoc.embedJpg(bytes);
+    const w = 96, h = (img.height / img.width) * 96;
+    cover.drawImage(img, { x: width-36-w, y: height-36-h, width:w, height:h });
+  } else {
+    // Octagram
+    const cx = width - 84, cy = height - 48;
+    const r = 24;
+    const points = [];
+    for (let i=0;i<8;i++){ 
+      const a = (Math.PI/4)*i; 
+      points.push([cx + r*Math.cos(a), cy + r*Math.sin(a)]);
+    }
+    // Draw star
+    for (let i=0;i<8;i++){
+      const j=(i+3)%8;
+      cover.drawLine({ start: {x:points[i][0], y:points[i][1]}, end: {x:points[j][0], y:points[j][1]}, thickness:1, color: PDFLib.rgb(1,1,1)});
+    }
+  }
+
+  // Body text
+  const text = [
+    `t_in:  ${seal.context.t_in}`,
+    `t_out: ${seal.context.t_out}`,
+    `Δt_ms: ${seal.context.duration_ms}`,
+    `S1:    ${seal.s1}`,
+    `S2:    ${seal.s2_lite}`,
+    `Variant: ${seal.context.variant}`,
+    `Location: ${seal.context.location.type}`
+  ];
+  let y = height - 120;
+  text.forEach(line => { cover.drawText(line, { x: 36, y, size: 10, font, color: PDFLib.rgb(0.95,0.95,0.98) }); y -= 14; });
+
+  // Copy original pages
+  const pages = await outDoc.copyPages(srcDoc, srcDoc.getPageIndices());
+  pages.forEach(p => outDoc.addPage(p));
+  const outBytes = await outDoc.save();
+  return outBytes;
+}
+
+// ---------- Output rendering ----------
+function showSeal(seal) {
+  const outputDiv = document.getElementById('output');
+  const s1Short = document.getElementById('s1Short');
+  const s2Short = document.getElementById('s2Short');
+  const s1Full = document.getElementById('s1Full');
+  const s2Full = document.getElementById('s2Full');
+  const sealJson = document.getElementById('sealJson');
+  const bangBlock = document.getElementById('bangBlock');
+
+  s1Short.textContent = shortHash(seal.s1);
+  s2Short.textContent = shortHash(seal.s2_lite);
+  s1Full.textContent = seal.s1;
+  s2Full.textContent = seal.s2_lite;
+
+  sealJson.textContent = JSON.stringify(seal.sealRecord, null, 2);
+  bangBlock.textContent = seal.bangBlock;
+
+  outputDiv.classList.remove('hidden');
+  setTimeout(() => outputDiv.classList.add('opacity-100'), 10);
+}
+
+// ---------- Tabs & UX ----------
+const tabText = document.getElementById('tabText');
+const tabFile = document.getElementById('tabFile');
+const textForm = document.getElementById('textForm');
+const fileForm = document.getElementById('fileForm');
+tabText.addEventListener('click', () => {
+  tabText.classList.add('bg-purple-700'); tabFile.classList.remove('bg-purple-700'); tabFile.classList.add('bg-gray-700');
+  textForm.classList.remove('hidden'); fileForm.classList.add('hidden');
+});
+tabFile.addEventListener('click', () => {
+  tabFile.classList.add('bg-purple-700'); tabText.classList.remove('bg-purple-700'); tabText.classList.add('bg-gray-700');
+  fileForm.classList.remove('hidden'); textForm.classList.add('hidden');
+});
+const inputEl = document.getElementById('inputText');
+const charCount = document.getElementById('charCount');
+const resetBtn = document.getElementById('resetBtn');
+inputEl.addEventListener('input', () => { charCount.textContent = inputEl.value.length + ' chars'; });
+resetBtn.addEventListener('click', () => { inputEl.value=''; charCount.textContent='0 chars'; });
+</script>
+</body>
+</html>
