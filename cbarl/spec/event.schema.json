@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CBARL Seal Event",
+  "type": "object",
+  "description": "Append‑only event record for a sealed artifact submitted to the Cosmic Blockchain Append‑only Restorative Ledger (CBARL).",
+  "required": ["kind", "version", "artifact_ref", "seal", "bangcheck", "anchors"],
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": ["cbarl.seal"],
+      "description": "Event type.  For seal events this must be 'cbarl.seal'."
+    },
+    "version": {
+      "type": "string",
+      "description": "Schema version or protocol version (e.g. '1.0')."
+    },
+    "artifact_ref": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "File name or text identifier of the sealed artifact."
+        },
+        "mime": {
+          "type": "string",
+          "description": "Optional MIME type (e.g. 'application/pdf', 'text/plain')."
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Optional size of the artifact in bytes."
+        }
+      },
+      "additionalProperties": false
+    },
+    "seal": {
+      "type": "object",
+      "required": ["variant", "t_in", "t_out", "dur_ms", "location"],
+      "description": "Seal metadata.  Corresponds to CSL‑Min, CSL‑Plus or CSP‑RK records.",
+      "properties": {
+        "variant": {"type": "string"},
+        "t_in": {"type": "string", "format": "date-time"},
+        "t_out": {"type": "string", "format": "date-time"},
+        "dur_ms": {"type": "integer", "minimum": 0},
+        "location": {"type": ["string", "object"]},
+        "usercode_ref": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "bangcheck": {
+      "type": "string",
+      "description": "Full BangCheck block (protocol‑only).  Preserve line breaks."
+    },
+    "sidecar": {
+      "type": "object",
+      "description": "Optional courtesy digests and comparison metrics.",
+      "properties": {
+        "sha256": {"type": "string"},
+        "sha384": {"type": "string"},
+        "sha512": {"type": "string"},
+        "delta": {
+          "type": "object",
+          "description": "Pairwise Hamming distances or other diagnostics between digests.",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "anchors": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "List of ledger anchors (case IDs, annex file names, etc.)."
+    }
+  },
+  "additionalProperties": false
+}

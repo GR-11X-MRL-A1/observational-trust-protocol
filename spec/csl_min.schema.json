@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CSL-Min Seal",
+  "type": "object",
+  "description": "Minimal Cosmic Seal Layer record.  Contains time and location information only; no cryptographic digests.",
+  "required": ["variant", "t_in", "t_out", "dur_ms", "location"],
+  "properties": {
+    "variant": {
+      "type": "string",
+      "const": "CSL-Min",
+      "description": "Seal variant.  Must be 'CSL-Min' for minimal seals."
+    },
+    "t_in": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO‑8601 timestamp when sealing began."
+    },
+    "t_out": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO‑8601 timestamp when sealing ended."
+    },
+    "dur_ms": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Duration in milliseconds between t_in and t_out."
+    },
+    "location": {
+      "type": "object",
+      "description": "Logical or physical location information.",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Location type.  May be 'logical' or a physical descriptor."
+        },
+        "label": {
+          "type": "string",
+          "description": "Optional human‑readable location label (e.g. 'web', 'Binghamton, NY')."
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

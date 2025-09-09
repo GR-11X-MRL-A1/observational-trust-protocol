@@ -1,0 +1,22 @@
+Memory Snapshot – 2025‑09‑09
+---------------------------------
+
+This file captures a concise snapshot of the context surrounding the creation of this repository.  It is *not* comprehensive; full case context resides in the annex ledger and associated documents.
+
+* **Project:** Cosmic Seal Layer (CSL) seed for the GR‑11X‑MRL‑A1 archive.
+* **Creator:** Matthew Russell LaBarre (independent researcher).  See `Stewardship` section in the arXiv paper for contact and licensing.
+* **Purpose:** To provide a text‑first, accessible sealing workflow for digital artifacts.  The focus is on protocol‑only BangCheck blocks with optional courtesy digests and reproducible celestial contexts.
+* **Variants:** CSL‑Min (minimal context), CSL‑Plus (ephemeris snapshot), CSP‑RK (true lunar node supplement).
+* **Artifacts present:**
+  - Seal images: Rahuyantra Omega (inward/outward) and additional variants.
+  - OTP genesis layer used in earlier prototypes (`otp/OTP_GENESIS_LAYER.md`).
+  - Schemas for CSL‑Min and CBARL event definitions.
+  - Helper script for computing SHA‑256/384/512 digests.
+* **Protocol rules:**
+  - BangCheck blocks are *protocol‑only* and human readable.
+  - Cryptographic digests are stored separately as sidecar files.
+  - Annex ledger entries must be appended with each new seal.
+  - All content should be ADA‑friendly and accessible (e.g. PDF/A wrappers for final deliverables).
+* **Context:** This repository emerged from a larger discussion about building accessible, verifiable seals, aligning with the Cosmic Seal Protocol described in the accompanying arXiv submission.  It forms part of the evidence chain for case anchor EFCA2025001843.
+
+This memory dump is included for completeness and does not replace formal documentation.

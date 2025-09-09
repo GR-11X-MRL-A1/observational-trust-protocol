@@ -1,0 +1,9 @@
+!BEGIN
+!RPP -
+!CSL CSL-Min
+!IN  t_in=2025-09-09T03:15:44Z loc=logical:web
+!OUT t_out=2025-09-09T03:15:44Z dur_ms=0
+!USERCODE_REF CSP_Theory_Export_v0.3.pdf
+!ANCHORS EFCA2025001843; ANNEX_LEDGER_2025-08-27.md
+!NOTES Protocol-only; courtesy digests in sidecar.
+!END
