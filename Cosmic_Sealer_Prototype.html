@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Sealer Prototype</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/1.3.1/forge.min.js"></script>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 1rem; }
+        textarea { width: 100%; height: 100px; }
+        button { padding: 0.5rem 1rem; background: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        #output { margin-top: 2rem; padding: 1rem; background: #f5f5f5; border-radius: 5px; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+
+    <h1>Cosmic Sealer</h1>
+    <p>Enter some text to seal it to a moment in spacetime.</p>
+
+    <textarea id="inputText" placeholder="Type your truth here..."></textarea>
+    <br>
+    <button onclick="sealTheText()">Seal It</button>
+
+    <div id="output">Your seal will appear here.</div>
+
+    <script>
+        // This is our core sealing function
+        function createCosmicSeal(artifactString) {
+            // 1. Capture the precise start time (t_in)
+            const t_in = new Date().toISOString();
+            const startTime = performance.now(); // high-precision timer
+
+            // 2. Calculate the SHA-384 hash of the artifact (S1)
+            const md = forge.md.sha384.create();
+            md.update(artifactString);
+            const s1Hash = md.digest().toHex();
+
+            // 3. Capture the precise end time (t_out) and calculate duration (Δt)
+            const endTime = performance.now();
+            const t_out = new Date().toISOString();
+            const duration_ms = (endTime - startTime).toFixed(2);
+
+            // 4. Gather the Context (simplified for now)
+            const sealContext = {
+                variant: "CSL-Min",
+                t_in: t_in,
+                t_out: t_out,
+                duration_monotonic: duration_ms,
+                location: { 
+                    type: "logical", 
+                    label: "Web Browser" 
+                }
+            };
+
+            // 5. Create the Seal Record and hash it to make S2_lite
+            const sealContextString = JSON.stringify(sealContext);
+            md.start();
+            md.update(sealContextString);
+            const s2Hash = md.digest().toHex();
+
+            // 6. Return the complete seal
+            return {
+                s1: s1Hash,
+                s2_lite: s2Hash,
+                duration: duration_ms,
+                sealRecord: sealContext
+            };
+        }
+
+        // This function runs when the button is clicked
+        function sealTheText() {
+            const input = document.getElementById('inputText').value;
+            if (!input) { 
+                alert("Please enter some text first!");
+                return;
+            }
+
+            const seal = createCosmicSeal(input);
+            const outputDiv = document.getElementById('output');
+
+            // Display the results on the webpage
+            outputDiv.innerHTML = `
+✅ Sealed in <b>${seal.duration} milliseconds</b>
+
+<b>S1 (Artifact Hash):</b>
+${seal.s1}
+
+<b>S2 Lite (Seal Hash):</b>
+${seal.s2_lite}
+
+<b>Full Seal Record:</b>
+${JSON.stringify(seal.sealRecord, null, 2)}
+            `;
+        }
+    </script>
+</body>
+</html>
