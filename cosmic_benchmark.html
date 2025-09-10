@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cosmic Seal Benchmark</title>
+  <style>
+    body { font-family: sans-serif; margin: 2rem; }
+    textarea { width: 100%; height: 6rem; }
+    .hash-box { margin: 1rem 0; padding: 1rem; background: #eee; border-radius: 5px; font-family: monospace; }
+    .hash-box label { display: block; font-weight: bold; margin-bottom: 0.5rem; color: #333; }
+  </style>
+</head>
+<body>
+  <h1>Cosmic Seal Benchmark</h1>
+  <textarea id="inputText" placeholder="Type text to seal..."></textarea>
+  <button onclick="sealTheText()">Seal Text</button>
+  <div id="output"></div>
+
+  <script>
+    // Utility: SHA-384 hex
+    async function sha384Hex(input) {
+      const enc = new TextEncoder();
+      const data = enc.encode(input);
+      const digest = await crypto.subtle.digest('SHA-384', data);
+      return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    // Simplified cosmic seal for demo
+    async function createCosmicSeal(text) {
+      const t_in = new Date().toISOString();
+      const start = performance.now();
+      const s1 = await sha384Hex(text);
+      const s2_lite = await sha384Hex(t_in + s1);
+      const duration = Number((performance.now() - start).toFixed(2));
+      return { s1, s2_lite, duration, sealRecord: { t_in } };
+    }
+
+    async function sealTheText() {
+      const input = document.getElementById('inputText').value;
+      if (!input) {
+        alert("Please enter some text first!");
+        return;
+      }
+      const seal = await createCosmicSeal(input);
+      displaySeal(seal);
+    }
+
+    function displaySeal(seal) {
+      const outputDiv = document.getElementById('output');
+      const shortS1 = seal.s1.substring(0, 20) + '...' + seal.s1.substring(seal.s1.length - 8);
+      const shortS2 = seal.s2_lite.substring(0, 20) + '...' + seal.s2_lite.substring(seal.s2_lite.length - 8);
+      outputDiv.innerHTML = `
+        <h3>✅ Sealed in <b>${seal.duration} milliseconds</b></h3>
+        <div class="hash-box"><label>Artifact Fingerprint (S1):</label><code>${shortS1}</code></div>
+        <div class="hash-box"><label>Spacetime Fingerprint (S2 Lite):</label><code>${shortS2}</code></div>
+        <p><strong>Context:</strong> Sealed in your browser at <em>${seal.sealRecord.t_in}</em></p>
+        <button onclick="runDemo()">🔬 Prove It: Run Performance Comparison</button>
+        <div id="labOutput"></div>
+      `;
+    }
+
+    // Benchmark cosmic seal vs SHA-256 hashing
+    async function runDemo() {
+      const lab = document.getElementById('labOutput');
+      lab.innerHTML = "<p>Running performance tests... (This will take a few seconds)</p>";
+      const text = document.getElementById('inputText').value || 'benchmark';
+      const iterations = 100;
+
+      // Cosmic Seal benchmark
+      const startCosmic = performance.now();
+      for (let i = 0; i < iterations; i++) {
+        await createCosmicSeal(text + i);
+      }
+      const cosmicTime = performance.now() - startCosmic;
+
+      // SHA-256 baseline
+      const enc = new TextEncoder();
+      const data = enc.encode(text);
+      const startSha = performance.now();
+      for (let i = 0; i < iterations; i++) {
+        await crypto.subtle.digest('SHA-256', data);
+      }
+      const shaTime = performance.now() - startSha;
+
+      lab.innerHTML = `
+        <p>Completed ${iterations} iterations.</p>
+        <ul>
+          <li>Cosmic Seal: ${ (cosmicTime/iterations).toFixed(2) } ms per op</li>
+          <li>SHA-256: ${ (shaTime/iterations).toFixed(2) } ms per op</li>
+        </ul>
+      `;
+    }
+  </script>
+</body>
+</html>
