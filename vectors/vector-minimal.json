@@ -1,0 +1,12 @@
+{
+  "ulsv":"1.4.0",
+  "artifact_digest_alg":"sha-384",
+  "artifact_digest":"a411aa5b9c5cf7c9dcf1331b250c3c246bb534514c688e25a132754d223a2c24cbc34b442d42f57fa398740d27116749",
+  "t_in":"2025-09-11T02:24:34.000Z",
+  "t_out":"2025-09-11T02:24:34.042Z",
+  "duration_ms":42,
+  "clock":{"type":"monotonic","source":"os","resolution_ns":1000000,"leap_second_model":"smearing"},
+  "anchor":{"variant":"minimal","parameters":{"minimal":{"declared_limits":{"jitter_ms":2}}}},
+  "s2_alg":"sha-384",
+  "s2":"873d76c49f171135bf9da2f25a7028a9c1b357c976eed2d0a5275eea73f26e476499c2adfcb8fb9a4cf98b24c45c1508"
+}

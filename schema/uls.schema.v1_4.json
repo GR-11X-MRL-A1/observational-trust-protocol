@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/uls.schema.v1_4.json",
+  "title": "Universal Light Seal (ULS) v1.4",
+  "type": "object",
+  "required": ["ulsv","artifact_digest_alg","artifact_digest","t_in","t_out","duration_ms","clock","anchor","s2_alg","s2"],
+  "properties": {
+    "ulsv": {"type":"string","pattern":"^1\\.4\\.\\d+$"},
+    "artifact_digest_alg": {"type":"string"},
+    "artifact_digest": {"type":"string","pattern":"^[0-9a-f]{96}$"},
+    "t_in": {"type":"string","format":"date-time"},
+    "t_out": {"type":"string","format":"date-time"},
+    "duration_ms": {"type":"integer","minimum":0},
+    "clock": {
+      "type":"object",
+      "required":["type","source","resolution_ns","leap_second_model"],
+      "properties":{
+        "type":{"enum":["monotonic"]},
+        "source":{"type":"string"},
+        "resolution_ns":{"type":"integer","minimum":1},
+        "leap_second_model":{"enum":["smearing","step"]}
+      },
+      "additionalProperties": false
+    },
+    "anchor": {
+      "type":"object",
+      "required":["variant","parameters"],
+      "properties":{
+        "variant":{"enum":["minimal","vdf","celestial","tee"]},
+        "parameters":{"type":"object"}
+      },
+      "additionalProperties": false
+    },
+    "s2_alg":{"type":"string"},
+    "s2":{"type":"string","pattern":"^[0-9a-f]{96}$"},
+    "signatures":{
+      "type":"array",
+      "items":{
+        "type":"object",
+        "required":["alg","sig","covered"],
+        "properties":{
+          "alg":{"type":"string"},
+          "key_id":{"type":"string"},
+          "covered":{"enum":["S1","S2","BOTH"]},
+          "sig":{"type":"string"},
+          "created":{"type":"string","format":"date-time"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "notes":{"type":["string","null"]}
+  },
+  "additionalProperties": true
+}
