@@ -1,0 +1,3 @@
+# Prevent accidental pushes
+confidential_medical*.pdf
+sensitive_evidence/

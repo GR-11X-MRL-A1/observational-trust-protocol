@@ -21,3 +21,14 @@ This repository is intended as a starting point for the **GR‑11X‑MRL‑A1** 
 3. Optionally compute courtesy digests using `scripts/verify_hashes.py` and save them as a JSON sidecar next to the sealed artifact.
 
 See the documentation and schemas for details on the field meanings and how to use CSL‑Plus and CSP‑RK in future releases.
+---
+
+## Falcon Settlement Package
+
+This repository now also hosts a structured settlement proposal for the Falcon Press dispute, including:
+
+- **financials/** – PTSD-adjusted compensation model and revenue analysis supporting the $535k settlement figure.
+- **legal/** – Draft demand letter and OTP compliance references for formal correspondence.
+- **diagrams/** – Mermaid pie chart visualizing the proportional breakdown of settlement components.
+
+These materials are bundled for rapid deployment to a dedicated public repository when negotiations require formal disclosure.
