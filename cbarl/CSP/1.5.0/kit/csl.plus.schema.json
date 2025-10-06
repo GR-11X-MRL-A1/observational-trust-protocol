@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://observational-trust-protocol/csl/1.5.0/csl.plus.schema.json",
+  "title": "Cosmic Seal Layer (CSL-Plus) 1.5.0",
+  "allOf": [
+    { "$ref": "csl.min.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "variant": {
+          "const": "CSL-Plus"
+        },
+        "cosmic_base": {
+          "type": "object",
+          "required": ["hash", "schema", "serialized"],
+          "additionalProperties": false,
+          "properties": {
+            "hash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{96}$",
+              "description": "SHA-384 digest of the deterministic cosmic_base payload."
+            },
+            "schema": {
+              "type": "string",
+              "description": "Identifier for the cosmic_base schema or manifest version."
+            },
+            "serialized": {
+              "type": "string",
+              "description": "Canonical serialization used to derive the cosmic_base hash."
+            }
+          },
+          "description": "Deterministic environment snapshot accompanying CSL-Plus."
+        }
+      },
+      "required": ["cosmic_base"]
+    }
+  ]
+}

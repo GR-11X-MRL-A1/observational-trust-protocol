@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://observational-trust-protocol/csl/1.5.0/csl.min.schema.json",
+  "title": "Cosmic Seal Layer (CSL-Min) 1.5.0",
+  "type": "object",
+  "required": ["variant", "t_in", "t_out", "Δt", "anchor"],
+  "additionalProperties": false,
+  "properties": {
+    "variant": {
+      "const": "CSL-Min",
+      "description": "CSL variant identifier."
+    },
+    "t_in": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Interval start in UTC (RFC 3339)."
+    },
+    "t_out": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Interval end in UTC (RFC 3339)."
+    },
+    "Δt": {
+      "type": "string",
+      "pattern": "^[0-9]+s$",
+      "description": "Elapsed interval between t_in and t_out expressed in whole seconds."
+    },
+    "location_type": {
+      "type": "string",
+      "enum": ["logical", "physical"],
+      "description": "Descriptor for the sealing location context."
+    },
+    "location": {
+      "type": ["string", "null"],
+      "description": "Optional human-readable location note."
+    },
+    "anchor": {
+      "type": "object",
+      "required": ["frame", "serialized", "hash", "bodies"],
+      "additionalProperties": false,
+      "properties": {
+        "frame": {
+          "type": "string",
+          "description": "Reference frame used for quantised celestial positions (e.g., ECLIPJ2000)."
+        },
+        "bodies": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_\-]+$"
+          },
+          "minItems": 1,
+          "description": "Ordered list of celestial bodies encoded in the serialization."
+        },
+        "serialized": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_:\-,]+$",
+          "description": "Comma-delimited quantised anchor string (body:lon:lat:dist)."
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{96}$",
+          "description": "SHA-384 digest of the serialized anchor string."
+        }
+      },
+      "description": "Deterministic celestial anchor evaluated at t_in."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional human-readable notes relevant to the seal."
+    }
+  }
+}

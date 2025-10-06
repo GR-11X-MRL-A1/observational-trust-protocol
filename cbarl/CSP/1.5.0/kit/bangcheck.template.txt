@@ -1,0 +1,9 @@
+!BEGIN {{title}}
+!RPP sha384={{receipt_hash}}
+!CSL variant={{variant}} t_in={{t_in}} t_out={{t_out}} Δt={{delta_t}} anchor.hash={{anchor_hash}}
+!S1_CONTENT sha384={{s1}}
+!S2_LITE sha384={{s2}}
+!ANCHORS {{anchor_serialization}}
+!NOTES {{notes}}
+!END
+!SHA384-BLOCK {{bangcheck_hash}}
