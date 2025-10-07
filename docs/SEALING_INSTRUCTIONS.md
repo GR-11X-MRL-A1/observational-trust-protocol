@@ -1,6 +1,6 @@
 # Sealing Instructions
 
-This document provides a step‑by‑step guide for generating **Cosmic Seal Layer** (CSL) records.  It emphasises accessibility and reproducibility.  All seals are **protocol‑only** unless otherwise specified: the BangCheck block contains no cryptographic digests, leaving those values to optional sidecars.  These instructions assume you are using the [Cosmic Sealer web app](https://matthewlabarre.com) or an equivalent client to generate seals.
+This document provides a step‑by‑step guide for generating **Cosmic Seal Layer** (CSL) records.  It emphasises accessibility and reproducibility.  All seals are **protocol‑only** unless otherwise specified: the BangCheck block contains no cryptographic digests, leaving those values to optional sidecars.  These instructions assume you are using the [Cosmic Sealer web app](https://matthewlabarreaol.com) or an equivalent client to generate seals.  The new host enables privacy controls for direct contact with the maintainer.
 
 ## 1. Prepare your artifact
 
